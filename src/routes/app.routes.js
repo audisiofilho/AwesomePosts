@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {createStackNavigator} from '@react-navigation/stack'
+import {createStackNavigator} from '@react-navigation/stack';
 
 import Feather from 'react-native-vector-icons/Feather';
 
@@ -13,12 +13,25 @@ import PostsUser from '../pages/PostsUser';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-function StackScreen(){
-  return(
+function StackScreen() {
+  return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={Home} options={{ headerShown: false}}/>
-      <Stack.Screen name="NewPost" component={NewPost}/>
-      <Stack.Screen name="PostsUser" component={PostsUser}/>
+      <Stack.Screen
+        name="Home"
+        component={Home}
+        options={{headerShown: false}}
+      />
+      <Stack.Screen
+        name="NewPost"
+        component={NewPost}
+        options={{
+          headerTintColor: '#FFF',
+          headerStyle: {
+            backgroundColor: '#36393f',
+          },
+        }}
+      />
+      <Stack.Screen name="PostsUser" component={PostsUser} />
     </Stack.Navigator>
   );
 }
