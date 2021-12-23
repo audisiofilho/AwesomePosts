@@ -7,6 +7,7 @@ import {ActivityIndicator, Text, View} from 'react-native';
 import {Container, ButtonPost, ListPosts} from './styles';
 import Feather from 'react-native-vector-icons/Feather';
 import Header from '../../components/Header';
+import PostsList from '../../components/PostsList';
 
 export default function Home() {
   const navigation = useNavigation();
@@ -33,7 +34,7 @@ export default function Home() {
         setLoading(false);
       });
 
-      return () => subscriber();
+    return () => subscriber();
   }, []);
 
   return (
@@ -45,7 +46,12 @@ export default function Home() {
           <ActivityIndicator size={50} color="#e52246" />
         </View>
       ) : (
-        <ListPosts data={posts} renderItem={({item}) => <Text>TESTE</Text>} />
+        <ListPosts
+          data={posts}
+          renderItem={({item}) => (
+            <PostsList data={item} userId={user?.uid} />
+          )}
+        />
       )}
 
       <ButtonPost onPress={() => navigation.navigate('NewPost')}>
