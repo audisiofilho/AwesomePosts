@@ -66,20 +66,51 @@ export default function Home() {
       .limit(5)
       .get()
       .then(snapshot => {
-          setPosts([]);
-          const postList = [];
+        setPosts([]);
+        const postList = [];
 
-          snapshot.docs.map(u => {
-            postList.push({
-              ...u.data(),
-              id: u.uid,
-            });
+        snapshot.docs.map(u => {
+          postList.push({
+            ...u.data(),
+            id: u.uid,
           });
-          setEmptyList(false);
-          setPosts(postList);
-          setLastItem(snapshot.docs[snapshot.docs.length - 1]);
+        });
+        setEmptyList(false);
+        setPosts(postList);
+        setLastItem(snapshot.docs[snapshot.docs.length - 1]);
       });
-      setLoadingRefresh(false);
+    setLoadingRefresh(false);
+  }
+
+  async function getListPosts() {
+    if (emptyList) {
+      setLoading(false);
+      return null;
+    }
+
+    if (loading) return;
+
+    firestore()
+      .collection('posts')
+      .orderBy('created', 'desc')
+      .limit(5)
+      .startAfter(lastItem)
+      .get()
+      .then(snapshot => {
+        const postList = [];
+
+        snapshot.docs.map(u => {
+          postList.push({
+            ...u.data(),
+            id: u.id,
+          });
+        });
+
+        setEmptyList(!!snapshot.empty);
+        setLastItem(snapshot.docs[snapshot.docs.length - 1]);
+        setPosts(oldPosts => [...oldPosts, ...postList]);
+        setLoading(false);
+      });
   }
 
   return (
@@ -97,6 +128,8 @@ export default function Home() {
           renderItem={({item}) => <PostsList data={item} userId={user?.uid} />}
           refreshing={loadingRefresh}
           onRefresh={handleRefreshPosts}
+          onEndReached={()=>getListPosts()}
+          onEndReachedThreshold={0.1}
         />
       )}
 
