@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 
 import {
   Container,
@@ -13,31 +13,48 @@ import {
   TimePost,
 } from './styles';
 
+import {formatDistance} from 'date-fns';
+import {ptBR} from 'date-fns/locale';
 import MaterialCommnityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-export default function PostsList() {
+export default function PostsList({data, userId}) {
+  const [likePost, setLikePost] = useState(data?.likes);
+
+  function formatTimePost() {
+    //console.log(new Date(data.created.seconds * 1000));
+    const datePost = new Date(data.created.seconds * 1000);
+
+    return formatDistance(new Date(), datePost, {
+      locale: ptBR,
+    });
+  }
+
   return (
     <Container>
       <Header>
-        <Avatar source={require('../../assets/avatar.png')} />
-        <Name numberOfLines={1}>Audisio</Name>
+        {data.avatarUrl ? (
+          <Avatar source={{uri: data.avatarUrl}} />
+        ) : (
+          <Avatar source={require('../../assets/avatar.png')} />
+        )}
+        <Name numberOfLines={1}>{data?.autor}</Name>
       </Header>
 
       <ContentView>
-        <Content>Todo conteudo do post</Content>
+        <Content>{data?.content}</Content>
       </ContentView>
 
       <Actions>
         <LikeButton>
-          <Like>12</Like>
+          <Like>{likePost === 0 ? '' : likePost}</Like>
           <MaterialCommnityIcons
-            name="heart-plus-outline"
+            name={likePost === 0 ? 'heart-plus-outline' : 'cards-heart'}
             size={20}
             color="#e52246"
           />
         </LikeButton>
 
-        <TimePost>há um minuto atrás</TimePost>
+        <TimePost>{formatTimePost()}</TimePost>
       </Actions>
     </Container>
   );
