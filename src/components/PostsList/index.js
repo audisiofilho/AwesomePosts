@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 
+import firestore from '@react-native-firebase/firestore';
+
 import {
   Container,
   Name,
@@ -19,6 +21,44 @@ import MaterialCommnityIcons from 'react-native-vector-icons/MaterialCommunityIc
 
 export default function PostsList({data, userId}) {
   const [likePost, setLikePost] = useState(data?.likes);
+
+  async function handleLikePost(id, likes) {
+    const docId = `${userId}_${id}`;
+
+    const doc = await firestore().collection('likes').doc(docId).get();
+
+    if (doc.exists) {
+      await firestore()
+        .collection('posts')
+        .doc(id)
+        .update({
+          likes: likes - 1,
+        });
+      await firestore()
+        .collection('likes')
+        .doc(docId)
+        .delete()
+        .then(() => {
+          setLikePost(likes - 1);
+        });
+
+      return;
+    }
+
+    await firestore().collection('likes').doc(docId).set({
+      postId: id,
+      userId: userId,
+    });
+    await firestore()
+      .collection('posts')
+      .doc(id)
+      .update({
+        likes: likes + 1,
+      })
+      .then(() => {
+        setLikePost(likes + 1);
+      });
+  }
 
   function formatTimePost() {
     //console.log(new Date(data.created.seconds * 1000));
@@ -45,7 +85,7 @@ export default function PostsList({data, userId}) {
       </ContentView>
 
       <Actions>
-        <LikeButton>
+        <LikeButton onPress={() => handleLikePost(data.id, likePost)}>
           <Like>{likePost === 0 ? '' : likePost}</Like>
           <MaterialCommnityIcons
             name={likePost === 0 ? 'heart-plus-outline' : 'cards-heart'}

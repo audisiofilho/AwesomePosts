@@ -38,7 +38,7 @@ export default function Home() {
               snapshot.docs.map(u => {
                 postList.push({
                   ...u.data(),
-                  id: u.uid,
+                  id: u.id,
                 });
               });
               setEmptyList(!!snapshot.empty);
@@ -72,7 +72,7 @@ export default function Home() {
         snapshot.docs.map(u => {
           postList.push({
             ...u.data(),
-            id: u.uid,
+            id: u.id,
           });
         });
         setEmptyList(false);
