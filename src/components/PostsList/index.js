@@ -14,12 +14,14 @@ import {
   Like,
   TimePost,
 } from './styles';
+import MaterialCommnityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import {formatDistance} from 'date-fns';
 import {ptBR} from 'date-fns/locale';
-import MaterialCommnityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {useNavigation} from '@react-navigation/native';
 
 export default function PostsList({data, userId}) {
+  const navigation = useNavigation();
   const [likePost, setLikePost] = useState(data?.likes);
 
   async function handleLikePost(id, likes) {
@@ -71,7 +73,13 @@ export default function PostsList({data, userId}) {
 
   return (
     <Container>
-      <Header>
+      <Header
+        onPress={() =>
+          navigation.navigate('PostsUser', {
+            tittle: data.autor,
+            userId: data.userId,
+          })
+        }>
         {data.avatarUrl ? (
           <Avatar source={{uri: data.avatarUrl}} />
         ) : (
