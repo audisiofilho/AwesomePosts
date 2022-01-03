@@ -23,7 +23,6 @@ import {useNavigation} from '@react-navigation/native';
 export default function PostsList({data, userId}) {
   const navigation = useNavigation();
   const [likePost, setLikePost] = useState(data?.likes);
-  const [liked, setLiked] = useState(0);
 
   async function handleLikePost(id, likes) {
     const docId = `${userId}_${id}`;
@@ -43,7 +42,6 @@ export default function PostsList({data, userId}) {
         .delete()
         .then(() => {
           setLikePost(likes - 1);
-          setLiked(0);
         });
 
       return;
@@ -61,7 +59,6 @@ export default function PostsList({data, userId}) {
       })
       .then(() => {
         setLikePost(likes + 1);
-        setLiked(1);
       });
   }
 
@@ -99,7 +96,7 @@ export default function PostsList({data, userId}) {
         <LikeButton onPress={() => handleLikePost(data.id, likePost)}>
           <Like>{likePost === 0 ? '' : likePost}</Like>
           <MaterialCommnityIcons
-            name={liked === 1 ? 'cards-heart' : 'heart-plus-outline'}
+            name={likePost === 0 ? 'heart-plus-outline' : 'cards-heart'}
             size={20}
             color="#e52246"
           />
