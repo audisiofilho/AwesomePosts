@@ -100,7 +100,18 @@ function AuthProvider({children}) {
 
   return (
     <AuthContext.Provider
-      value={{signed: !!user, user, signUp, signIn, signOut, loadingAuth, loading}}>
+      value={{
+        signed: !!user,
+        user,
+        signUp,
+        signIn,
+        signOut,
+        loadingAuth,
+        loading,
+        user,
+        setUser,
+        storageUser
+      }}>
       {children}
     </AuthContext.Provider>
   );

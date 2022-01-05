@@ -1,6 +1,8 @@
 import React, {useContext, useState} from 'react';
 import {Text, View, Modal, Platform} from 'react-native';
 
+import firestore from '@react-native-firebase/firestore';
+
 import {AuthContext} from '../../contexts/auth';
 
 import Header from '../../components/Header';
@@ -22,7 +24,7 @@ import {
 import Feather from 'react-native-vector-icons/Feather';
 
 export default function Profile() {
-  const {signOut, user} = useContext(AuthContext);
+  const {signOut, user, setUser, storageUser} = useContext(AuthContext);
 
   const [name, setName] = useState(user?.name);
   const [url, setUrl] = useState(null);
@@ -32,8 +34,35 @@ export default function Profile() {
     await signOut();
   }
 
-  async function updateProfile(){
-    alert('teste');
+  async function updateProfile() {
+    if (name === '') {
+      return;
+    }
+
+    await firestore().collection('users').doc(user?.uid).update({
+      name: name,
+    });
+
+    const postsDocs = await firestore()
+      .collection('posts')
+      .where('userId', '==', user?.uid)
+      .get();
+
+    postsDocs.forEach(async doc => {
+      await firestore().collection('posts').doc(doc.id).update({
+        autor: name,
+      });
+    });
+
+    let data = {
+      uid: user.uid,
+      name: name,
+      email: user.email,
+    };
+
+    setUser(data);
+    storageUser(data);
+    setOpen(false);
   }
 
   return (
@@ -41,12 +70,12 @@ export default function Profile() {
       <Header />
 
       {url ? (
-        <UploadButton onPress={() => alert('clicou1')}>
+        <UploadButton onPress={() => uploadFile()}>
           <UploadText>+</UploadText>
           <Avatar source={{uri: url}} />
         </UploadButton>
       ) : (
-        <UploadButton onPress={() => alert('clicou2')}>
+        <UploadButton onPress={() => uploadFile()}>
           <UploadText>+</UploadText>
         </UploadButton>
       )}
@@ -63,12 +92,16 @@ export default function Profile() {
 
       <Modal visible={open} animationType="slide" transparent={true}>
         <ModalContainer behavior={Platform.OS === 'android' ? '' : 'padding'}>
-          <ButtonBack onPress={()=> setOpen(false)}>
+          <ButtonBack onPress={() => setOpen(false)}>
             <Feather name="arrow-left" size={22} color="#121212" />
             <ButtonText color="#121212">Voltar</ButtonText>
           </ButtonBack>
 
-          <Input placeholder={user?.name} value={name} onChangeText={(text) => setName(text)}/>
+          <Input
+            placeholder={user?.name}
+            value={name}
+            onChangeText={text => setName(text)}
+          />
           <Button bg="#428cfd" onPress={updateProfile}>
             <ButtonText color="#fff">Salvar</ButtonText>
           </Button>
