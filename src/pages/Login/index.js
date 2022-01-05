@@ -13,6 +13,10 @@ import {
   SignUpText,
 } from './styles';
 
+import * as Animatable from 'react-native-animatable';
+
+const TitleAnimated = Animatable.createAnimatableComponent(Title);
+
 export default function Login() {
   const {signUp, signIn, loadingAuth} = useContext(AuthContext);
 
@@ -48,9 +52,9 @@ export default function Login() {
   if (login) {
     return (
       <Container>
-        <Title>
+        <TitleAnimated animation="flipInX">
           Awesome<Text style={{color: '#e52246'}}>Posts</Text>
-        </Title>
+        </TitleAnimated>
 
         <Input
           value={email}
@@ -81,9 +85,9 @@ export default function Login() {
 
   return (
     <Container>
-      <Title>
+      <TitleAnimated animation="pulse">
         Awesome<Text style={{color: '#e52246'}}>Posts</Text>
-      </Title>
+      </TitleAnimated>
 
       <Input
         value={name}

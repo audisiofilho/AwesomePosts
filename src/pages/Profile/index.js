@@ -33,20 +33,27 @@ export default function Profile() {
   const [url, setUrl] = useState(null);
   const [open, setOpen] = useState(false);
 
-  useEffect(()=>{
-    async function loadAvatar(){
-      try{
-        let response = await storage().ref('users').child(user?.uid).getDownloadURL();
-        setUrl(response);
-      }catch(err){
+  useEffect(() => {
+    let isActive = true;
+
+    async function loadAvatar() {
+      try {
+        if (isActive) {
+          let response = await storage()
+            .ref('users')
+            .child(user?.uid)
+            .getDownloadURL();
+          setUrl(response);
+        }
+      } catch (err) {
         console.log('Não encontramos nenhuma foto');
       }
     }
 
     loadAvatar();
 
-    return () => loadAvatar();
-  },[])
+    return () => (isActive = false);
+  }, []);
 
   async function handleSignOut() {
     await signOut();
