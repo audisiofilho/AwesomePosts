@@ -1,7 +1,8 @@
-import React, {useContext, useState} from 'react';
+import React, {useContext, useState, useEffect} from 'react';
 import {Text, View, Modal, Platform} from 'react-native';
 
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 
 import {launchImageLibrary} from 'react-native-image-picker';
 
@@ -31,6 +32,21 @@ export default function Profile() {
   const [name, setName] = useState(user?.name);
   const [url, setUrl] = useState(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(()=>{
+    async function loadAvatar(){
+      try{
+        let response = await storage().ref('users').child(user?.uid).getDownloadURL();
+        setUrl(response);
+      }catch(err){
+        console.log('Não encontramos nenhuma foto');
+      }
+    }
+
+    loadAvatar();
+
+    return () => loadAvatar();
+  },[])
 
   async function handleSignOut() {
     await signOut();
@@ -67,22 +83,59 @@ export default function Profile() {
     setOpen(false);
   }
 
-  const uploadFile = ()=>{
+  const uploadFile = () => {
     const options = {
       noData: true,
-      mediaType: 'photo'
+      mediaType: 'photo',
     };
 
-    launchImageLibrary(options, response =>{
-      if(response.didCancel){
-        console.log("cancelou");
-      }else if(response.error){
-        console.log("Ops parece que deu algo errado");
-      }else{
-        console.log("Enviar pro firebase")
+    launchImageLibrary(options, response => {
+      if (response.didCancel) {
+        console.log('cancelou');
+      } else if (response.error) {
+        console.log('Ops parece que deu algo errado');
+      } else {
+        uploadFileFirebase(response).then(() => {
+          uploadAvatarPosts();
+        });
+
+        setUrl(response.assets[0].uri);
       }
-    })
-  }
+    });
+  };
+
+  const getFileLocalPath = response => {
+    return response.assets[0].uri;
+  };
+
+  const uploadFileFirebase = async response => {
+    const fileSource = getFileLocalPath(response);
+
+    const storageRef = storage().ref('users').child(user?.uid);
+
+    return await storageRef.putFile(fileSource);
+  };
+
+  const uploadAvatarPosts = async () => {
+    const storageRef = storage().ref('users').child(user?.uid);
+    const url = await storageRef
+      .getDownloadURL()
+      .then(async image => {
+        const postsDocs = await firestore()
+          .collection('posts')
+          .where('userId', '==', user.uid)
+          .get();
+
+        postsDocs.forEach(async doc => {
+          await firestore().collection('posts').doc(doc.id).update({
+            avatarUrl: image,
+          });
+        });
+      })
+      .catch(error => {
+        console.log('ERROR AO ATUALIZAR FOTO DOS POSTS ', error);
+      });
+  };
 
   return (
     <Container>
