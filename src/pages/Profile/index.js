@@ -3,6 +3,8 @@ import {Text, View, Modal, Platform} from 'react-native';
 
 import firestore from '@react-native-firebase/firestore';
 
+import {launchImageLibrary} from 'react-native-image-picker';
+
 import {AuthContext} from '../../contexts/auth';
 
 import Header from '../../components/Header';
@@ -63,6 +65,23 @@ export default function Profile() {
     setUser(data);
     storageUser(data);
     setOpen(false);
+  }
+
+  const uploadFile = ()=>{
+    const options = {
+      noData: true,
+      mediaType: 'photo'
+    };
+
+    launchImageLibrary(options, response =>{
+      if(response.didCancel){
+        console.log("cancelou");
+      }else if(response.error){
+        console.log("Ops parece que deu algo errado");
+      }else{
+        console.log("Enviar pro firebase")
+      }
+    })
   }
 
   return (
